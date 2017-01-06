@@ -1,0 +1,134 @@
+function prefixZero(val) {
+  return val<10?`0${val}`:val 
+}
+
+function timeStamp() {
+  var d =  new Date(),
+    day = d.getDate(),
+    month = d.getMonth() + 1,
+    year = d.getFullYear(),
+    hours = d.getHours(),
+    minutes = d.getMinutes();
+  return `Added on - ${prefixZero(day)}/${prefixZero(month)}/${year} at ${prefixZero(hours)}:${prefixZero(minutes)}`
+}
+
+function InputBox(props) {
+  return(
+    <div>
+      <form>
+        <input type = "text" value = {props.inputData} className = "custom-input" onChange = {(e) => props.dataHandler(e)} placeholder = "Enter your To-do task"></input>
+      </form>
+    </div>
+  )
+}
+
+function AddItemController(props) {
+  return(
+    <div className = "item-controller">
+      <InputBox inputData = {props.inputData} dataHandler = {props.dataHandler}/>
+      <br/>
+      <AddButton addHandler = {props.addHandler}/>
+      <br/>
+      <SaveButton saveHandler = {props.saveHandler} inputData = {props.inputData}/>
+    </div>
+  )
+}
+
+function List(props) {
+  return(
+     <div>
+      <div className = "list">
+        {props.inputData}
+        <span className = "time-stamp">{timeStamp()}</span>
+        <p className = "del" onClick = {() => props.deleteItem(props.index)}>Delete</p>
+        <p className = "edit" onClick = {(e) => props.editItem(e, props.index)}>Edit</p>
+      </div>
+      <br/>
+     </div>
+  )
+}
+
+function SaveButton(props) {
+  return <button className = "save-button" onClick = {(e) => props.saveHandler(e)}>Save</button>
+}
+
+function AddButton(props) {
+  var {addHandler} = props
+  return <button className = "custom-button" onClick = {addHandler}>Add</button>
+}
+
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      items: [],
+      inputData: "",
+      modifiedIndex: -1
+    }
+  }
+  deleteList = (index) => {
+    console.log(index)
+    var items = this.state.items.slice()
+    items = items.filter((val,i) => i !== index)
+    this.setState({
+      items: items.slice()
+    })
+  };
+  addList = () => {
+    console.log("called")
+    var inputReset = ""
+    var items = this.state.items.slice()
+    var ipData = this.state.inputData
+    if(ipData === inputReset) {
+      return false
+    }
+    items.push(ipData)
+    this.setState({
+      items: items.slice(),
+      inputData: inputReset
+    })
+  };
+  dataHandler = (e) => {
+    console.log(e.target.value)
+    var data = e.target.value
+    this.setState({
+      inputData: data
+    })   
+  };
+  editItem = (e, index) => {
+    console.log(index)
+    var items = this.state.items.slice()
+    var oldData = items[index]
+    this.setState({
+      inputData: oldData,
+      modifiedIndex: index
+    })   
+  };
+  saveHandler = (e) => {
+    console.log("Called save")
+    var indexToEdit = this.state.modifiedIndex
+    var inputReset = ""
+    var items = this.state.items.slice()
+    var newData = this.state.inputData
+    console.log(newData)
+    items[indexToEdit] = newData
+    if(newData =+ "") return false
+    this.setState({
+      items: items,
+      inputData: inputReset
+    })
+  };
+  render() {
+    console.log("rendering")
+    const {items, inputData} = this.state
+     return(
+      <div className = "app">
+         <h2>To-do App using <span style = {{color: "#f25d13"}}>React JS</span></h2><br/>
+          {items.map((el,i) => <List key = {i} index = {i} deleteItem = {this.deleteList} inputData = {el} editItem = {this.editItem} />)}
+         <AddItemController addHandler = {this.addList} inputData = {inputData}  dataHandler = {this.dataHandler} saveHandler = {this.saveHandler}/>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App/>, document.getElementById("app"))
